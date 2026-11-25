@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitVita — Theo dõi Sức khỏe, Lịch tập &amp; Dinh dưỡng Cá nhân hóa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Top Header -->
+    <header class="topbar">
+      <div class="container topbar-inner">
+        <a href="#overview" class="brand" data-nav="overview" aria-label="FitVita Trang chủ">
+          <span class="brand-mark" aria-hidden="true">
+            <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+            </svg>
+          </span>
+          <span class="brand-text">
+            <strong>FitVita</strong>
+            <small>Tập luyện &amp; Dinh dưỡng</small>
+          </span>
+        </a>
+
+        <nav class="desktop-nav" role="tablist" aria-label="Điều hướng chính">
+          <button type="button" class="nav-tab" role="tab" data-tab="overview" aria-selected="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg>
+            <span>Tổng quan &amp; Chỉ số</span>
+          </button>
+          <button type="button" class="nav-tab" role="tab" data-tab="workout" aria-selected="false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M4 9v6"/><path d="M20 9v6"/><path d="M12 6.5v11"/></svg>
+            <span>Lịch tập</span>
+          </button>
+          <button type="button" class="nav-tab" role="tab" data-tab="nutrition" aria-selected="false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+            <span>Thực đơn</span>
+          </button>
+          <button type="button" class="nav-tab" role="tab" data-tab="history" aria-selected="false">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg>
+            <span>Lịch sử tập</span>
+          </button>
+        </nav>
+
+        <div class="topbar-actions">
+          <button type="button" id="theme-toggle" class="icon-btn" aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện Sáng / Tối">
+            <span id="theme-icon" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="container">
+        <section id="panel-overview" class="tab-panel" role="tabpanel" aria-label="Tổng quan và chỉ số cơ thể"></section>
+        <section id="panel-workout" class="tab-panel" role="tabpanel" aria-label="Lịch tập luyện" hidden></section>
+        <section id="panel-nutrition" class="tab-panel" role="tabpanel" aria-label="Thực đơn dinh dưỡng" hidden></section>
+        <section id="panel-history" class="tab-panel" role="tabpanel" aria-label="Lịch sử tập luyện" hidden></section>
+      </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-nav" role="tablist" aria-label="Điều hướng di động">
+      <button type="button" class="mobile-nav-btn" role="tab" data-tab="overview" aria-selected="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0"/><path d="M12 7v5l3 3"/></svg>
+        <span>Chỉ số</span>
+      </button>
+      <button type="button" class="mobile-nav-btn" role="tab" data-tab="workout" aria-selected="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6.5 6.5h11"/><path d="M6.5 17.5h11"/><path d="M4 9v6"/><path d="M20 9v6"/><path d="M12 6.5v11"/></svg>
+        <span>Lịch tập</span>
+      </button>
+      <button type="button" class="mobile-nav-btn" role="tab" data-tab="nutrition" aria-selected="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></svg>
+        <span>Thực đơn</span>
+      </button>
+      <button type="button" class="mobile-nav-btn" role="tab" data-tab="history" aria-selected="false">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v4l3 2"/><path d="M3.05 11a9 9 0 1 1 .5 4m-.5 5v-5h5"/></svg>
+        <span>Lịch sử</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Quick 5-Hour Simulation Button (corner pill; docked into topbar on mobile so it never covers content) -->
+  <button type="button" id="sim-5h-btn" class="sim-fab" title="Kiểm thử nhanh quy tắc tự động chốt buổi tập sau 5 tiếng">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+    </svg>
+    <span class="sim-label-full">Mô phỏng qua 5 tiếng</span>
+    <span class="sim-label-short">Qua 5h</span>
+  </button>
+
+  <!-- Exercise Guide Modal -->
+  <div id="guide-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="guide-modal-title" hidden>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div>
+          <span class="badge badge-accent" id="guide-modal-muscle">Nhóm cơ</span>
+          <h2 id="guide-modal-title" class="modal-title">Hướng dẫn bài tập</h2>
+        </div>
+        <button type="button" class="icon-btn modal-close" data-close-modal="guide-modal" aria-label="Đóng hướng dẫn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="guide-modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-close-modal="guide-modal">Đã hiểu, tiếp tục tập</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Missed Workout Auto-Close Alert Modal -->
+  <div id="missed-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="missed-modal-title" hidden>
+    <div class="modal-card modal-alert">
+      <div class="modal-header">
+        <div>
+          <span class="badge badge-warning">Tự động chốt sau 5 tiếng</span>
+          <h2 id="missed-modal-title" class="modal-title">Buổi tập trước đã được chốt tự động</h2>
+        </div>
+        <button type="button" class="icon-btn modal-close" data-close-modal="missed-modal" aria-label="Đóng thông báo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="missed-modal-body"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-ghost" data-close-modal="missed-modal">Để sau</button>
+        <button type="button" class="btn btn-primary" id="open-next-session-btn">Mở buổi tập tiếp theo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+
+  <script src="data.js"></script>
+  <script src="engine.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
