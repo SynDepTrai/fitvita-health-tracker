@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="fv-bg" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0F2D54"/>
+      <stop offset="100%" stop-color="#07162B"/>
+    </linearGradient>
+    <linearGradient id="fv-em" x1="16" y1="14" x2="50" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="fv-rim" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34D399" stop-opacity="0.9"/>
+      <stop offset="55%" stop-color="#0EA5E9" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0.85"/>
+    </linearGradient>
+  </defs>
+  <!-- Shield emblem base -->
+  <path d="M32 4L54 12.2C55.8 12.9 57 14.6 57 16.5V31.5C57 45.4 46.8 55.6 33.4 59.6C32.5 59.9 31.5 59.9 30.6 59.6C17.2 55.6 7 45.4 7 31.5V16.5C7 14.6 8.2 12.9 10 12.2L32 4Z" fill="url(#fv-bg)" stroke="url(#fv-rim)" stroke-width="2.5"/>
+  <!-- Inner subtle shield contour -->
+  <path d="M32 9.5L50.5 16.4C51.4 16.8 52 17.6 52 18.6V31.2C52 42.3 43.8 50.6 32 54.4C20.2 50.6 12 42.3 12 31.2V18.6C12 17.6 12.6 16.8 13.5 16.4L32 9.5Z" stroke="#FFFFFF" stroke-opacity="0.1" stroke-width="1.2"/>
+  <!-- Monogram V (Vita / Strength) -->
+  <path d="M18.5 22.5L29.6 45.2C30.6 47.2 33.4 47.2 34.4 45.2L45.5 22.5" stroke="#FFFFFF" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Vital Emerald Pulse Overlay -->
+  <path d="M16 32.5H23.5L27.4 25.5L32.2 38.5L36.2 29.5H48" stroke="url(#fv-em)" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Crown vitality spark -->
+  <circle cx="32" cy="17.5" r="3" fill="#34D399"/>
+</svg>
