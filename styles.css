@@ -666,6 +666,70 @@ button, input, select { font: inherit; color: inherit; }
   gap: 12px;
 }
 
+/* Quick-Pick Custom Workout Focus Bar */
+.quick-focus-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.quick-focus-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.quick-focus-title {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+}
+
+.focus-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.focus-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 6px 13px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border);
+  background: var(--bg-subtle);
+  color: var(--text-primary);
+  font-size: 0.84rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.focus-chip:hover {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.focus-chip[aria-pressed="true"] {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #FFFFFF;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 14px;
+}
+
 /* Workout Week Strip */
 .week-strip-head {
   display: flex;
@@ -1227,7 +1291,7 @@ button, input, select { font: inherit; color: inherit; }
 /* Responsive Breakpoints */
 @media (max-width: 960px) {
   .grid-2 { grid-template-columns: 1fr; }
-  .freq-grid { grid-template-columns: repeat(2, 1fr); }
+  .freq-grid, .preset-grid { grid-template-columns: repeat(2, 1fr); }
   .week-strip {
     grid-template-columns: repeat(7, minmax(112px, 1fr));
     overflow-x: auto;
@@ -1244,7 +1308,7 @@ button, input, select { font: inherit; color: inherit; }
   .stepper-bar { grid-template-columns: 1fr; gap: 8px; }
   .form-grid { grid-template-columns: 1fr; }
   .kpi-grid { grid-template-columns: 1fr; }
-  .diet-choice-grid, .diet-banner-switch { grid-template-columns: 1fr; }
+  .diet-choice-grid, .diet-banner-switch, .preset-grid { grid-template-columns: 1fr; }
   .meal-grid { grid-template-columns: 1fr; }
 
   /* Dock the 5h test button cleanly inside the top-right header on mobile so it NEVER blocks cards */

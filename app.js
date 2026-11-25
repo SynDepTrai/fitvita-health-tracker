@@ -130,7 +130,7 @@
           <span class="step-num">3</span>
           <span class="step-copy">
             <strong>Bước 3: Bắt đầu tập &amp; ăn</strong>
-            <span>${step2Done ? `Buổi tới: ${plan.days[plan.activeDayIndex].dayLabel}` : 'Theo dõi lịch tập mỗi ngày'}</span>
+            <span>${step2Done ? `Buổi tới: ${plan.days[plan.activeDayIndex].dayLabel}` : 'Hoặc tự chọn bài tập hôm nay'}</span>
           </span>
         </button>
       </div>
@@ -544,13 +544,55 @@
     const plan = state.workoutPlan;
 
     if (!plan) {
+      const todayLabel = Data.DAY_NAMES[Engine.getTodayDayIndex()];
+      const presetCardsHtml = Data.CUSTOM_WORKOUT_PRESETS.map(pr => `
+        <button type="button" class="choice-card" data-pick-preset="${escapeHtml(pr.id)}">
+          <div class="choice-card-top">
+            <strong>${escapeHtml(pr.shortLabel)}</strong>
+            <span class="badge badge-accent">${pr.exercises.length} bài</span>
+          </div>
+          <span>${escapeHtml(pr.focus)}</span>
+        </button>
+      `).join('');
+
       container.innerHTML = `
-        <div class="card empty-card">
-          <h3>Bạn chưa thiết lập lịch tập</h3>
-          <p>Chỉ mất 1 phút nhập chỉ số và chọn số buổi rảnh mỗi tuần để hệ thống tự chia nhóm cơ và ngày nghỉ phục hồi cho bạn.</p>
-          <button type="button" class="btn btn-primary" id="goto-overview-from-workout">Bắt đầu thiết lập ngay</button>
+        <div class="page-head">
+          <div>
+            <h1 class="page-title">Lịch tập luyện hôm nay (${escapeHtml(todayLabel)})</h1>
+            <p class="page-subtitle">Đã biết hôm nay muốn tập nhóm cơ nào? Chọn ngay bên dưới để hệ thống rải sẵn bài tập chuẩn cho bạn.</p>
+          </div>
+        </div>
+
+        <div class="stack">
+          <div class="card">
+            <div class="card-header" style="margin-bottom:6px;">
+              <h2 class="card-title">Hôm nay bạn muốn tập gì?</h2>
+              <span class="badge badge-accent">Rải sẵn bài tập ngay</span>
+            </div>
+            <p style="margin:0; font-size:0.88rem; color:var(--text-secondary);">Chọn 1 nhóm cơ muốn tập — bảng bài tập, số hiệp × lần, hướng dẫn kỹ thuật và đồng hồ chốt 5 tiếng sẽ sẵn sàng ngay lập tức.</p>
+            <div class="preset-grid">${presetCardsHtml}</div>
+          </div>
+
+          <div class="card" style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:14px;">
+            <div>
+              <strong style="font-size:0.96rem;">Chưa biết nên chia lịch tập thế nào?</strong>
+              <div style="font-size:0.85rem; color:var(--text-secondary);">Đánh giá BMI &amp; TDEE để hệ thống tự lên lịch tập cả tuần (3–6 buổi) kèm ngày nghỉ phục hồi.</div>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" id="goto-overview-from-workout">Đánh giá &amp; lên lịch cả tuần</button>
+          </div>
         </div>
       `;
+
+      document.querySelectorAll('[data-pick-preset]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const res = Engine.applyCustomFocusToDay(state, Engine.getTodayDayIndex(), btn.dataset.pickPreset);
+          if (res.ok) {
+            saveState();
+            renderWorkout();
+            showToast(`Đã rải sẵn ${res.preset.exercises.length} bài cho buổi ${res.preset.shortLabel}!`);
+          }
+        });
+      });
       document.getElementById('goto-overview-from-workout').addEventListener('click', () => setTab('overview'));
       return;
     }
@@ -573,17 +615,46 @@
       const isSelected = idx === selectedIdx;
       const isActive = idx === plan.activeDayIndex && !d.isRest;
       const statusLabel = isActive && d.status === 'pending' ? 'Buổi hiện tại' : statusTextMap[d.status];
+      const customPreset = d.isCustom ? Data.CUSTOM_WORKOUT_PRESETS.find(p => p.id === d.customPresetId) : null;
+      const shortName = d.isRest
+        ? 'Nghỉ phục hồi'
+        : (customPreset ? customPreset.shortLabel : d.title.split('—')[0].trim());
       return `
         <button type="button"
           class="day-pill ${d.isRest ? 'is-rest' : ''} ${isSelected ? 'is-selected' : ''} ${isActive ? 'is-active-session' : ''}"
           data-select-day="${idx}"
           aria-pressed="${isSelected}">
           <span class="day-pill-name">${escapeHtml(d.dayLabel)}</span>
-          <span class="day-pill-short">${escapeHtml(d.isRest ? 'Nghỉ phục hồi' : d.title.split('—')[0].trim())}</span>
+          <span class="day-pill-short">${escapeHtml(shortName)}</span>
           <span class="day-pill-status status-${d.status}">${escapeHtml(statusLabel)}</span>
         </button>
       `;
     }).join('');
+
+    let quickFocusHtml = '';
+    if (!day.locked) {
+      const chipsHtml = Data.CUSTOM_WORKOUT_PRESETS.map(pr => {
+        const isPicked = day.isCustom && day.customPresetId === pr.id;
+        return `
+          <button type="button" class="focus-chip" data-pick-preset="${escapeHtml(pr.id)}" aria-pressed="${isPicked}">
+            ${escapeHtml(pr.shortLabel)}
+          </button>
+        `;
+      }).join('');
+      const restoreBtn = day.isCustom
+        ? `<button type="button" class="btn btn-ghost btn-sm" id="restore-day-btn">Về lịch gốc</button>`
+        : '';
+
+      quickFocusHtml = `
+        <div class="quick-focus-card" aria-label="Tự chọn nhóm cơ tập cho ${escapeHtml(day.dayLabel)}">
+          <div class="quick-focus-head">
+            <span class="quick-focus-title">Đã biết ${escapeHtml(day.dayLabel)} muốn tập gì? Chọn nhanh để rải sẵn bài tập:</span>
+            ${restoreBtn}
+          </div>
+          <div class="focus-chips">${chipsHtml}</div>
+        </div>
+      `;
+    }
 
     let detailHtml = '';
     if (day.isRest) {
@@ -774,6 +845,7 @@
         ${weekStripHtml}
       </div>
 
+      ${quickFocusHtml}
       ${detailHtml}
     `;
 
@@ -788,6 +860,34 @@
         renderWorkout();
       });
     });
+
+    document.querySelectorAll('[data-pick-preset]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const currentDay = state.workoutPlan.days[selectedIdx];
+        if (currentDay && currentDay.isCustom && currentDay.customPresetId === btn.dataset.pickPreset) return;
+        const hasChecked = currentDay && currentDay.exercises.some(e => e.completed);
+        if (hasChecked && !window.confirm('Bạn đã tick một số bài trong buổi này. Đổi sang nhóm cơ khác sẽ làm mới danh sách bài của ngày này?')) {
+          return;
+        }
+        const res = Engine.applyCustomFocusToDay(state, selectedIdx, btn.dataset.pickPreset);
+        if (res.ok) {
+          saveState();
+          renderWorkout();
+          showToast(`Đã rải sẵn ${res.preset.exercises.length} bài tập cho ${currentDay.dayLabel}: ${res.preset.shortLabel}!`);
+        }
+      });
+    });
+
+    const restoreBtn = document.getElementById('restore-day-btn');
+    if (restoreBtn) {
+      restoreBtn.addEventListener('click', () => {
+        if (Engine.restoreDayFromCustom(state, selectedIdx)) {
+          saveState();
+          renderWorkout();
+          showToast('Đã khôi phục lại lịch gốc của ngày này.');
+        }
+      });
+    }
 
     const startBtn = document.getElementById('start-session-btn');
     if (startBtn) {

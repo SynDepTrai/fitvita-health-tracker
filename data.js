@@ -482,12 +482,73 @@
     }
   };
 
+  // Các gói nhóm cơ tự chọn nhanh khi người dùng đã biết hôm nay muốn tập gì
+  const CUSTOM_WORKOUT_PRESETS = [
+    {
+      id: 'chest_triceps',
+      shortLabel: 'Ngực & Tay sau',
+      title: 'Tự chọn — Ngực & Tay sau (Push)',
+      focus: 'Tăng cơ ngực, đẩy khỏe và săn chắc tay sau',
+      exercises: ['bench_press', 'incline_db_press', 'push_up', 'tricep_dip', 'plank']
+    },
+    {
+      id: 'back_biceps',
+      shortLabel: 'Lưng & Tay trước',
+      title: 'Tự chọn — Lưng xô & Tay trước (Pull)',
+      focus: 'Mở rộng lưng xô, cải thiện tư thế và cơ tay trước',
+      exercises: ['pull_up', 'barbell_row', 'seated_row', 'face_pull', 'bicep_curl']
+    },
+    {
+      id: 'legs',
+      shortLabel: 'Chân & Đùi',
+      title: 'Tự chọn — Chân & Đùi toàn diện',
+      focus: 'Sức mạnh đùi trước, đùi sau và bắp chân',
+      exercises: ['squat', 'rdl', 'bulgarian_split', 'lunge', 'calf_raise']
+    },
+    {
+      id: 'glutes_hips',
+      shortLabel: 'Mông & Hông',
+      title: 'Tự chọn — Mông & Hông săn chắc',
+      focus: 'Nâng mông lớn, đầy hõm hông và thon đùi',
+      exercises: ['hip_thrust', 'squat', 'bulgarian_split', 'glute_kickback', 'clamshell']
+    },
+    {
+      id: 'shoulders_arms',
+      shortLabel: 'Vai & Tay',
+      title: 'Tự chọn — Vai & Cánh tay sắc nét',
+      focus: 'Vai tròn cân đối, tay trước và tay sau gọn khỏe',
+      exercises: ['ohp', 'lateral_raise', 'face_pull', 'shoulder_arm_sculpt', 'bicep_curl', 'tricep_dip']
+    },
+    {
+      id: 'abs_cardio',
+      shortLabel: 'Bụng, Eo & Đốt mỡ',
+      title: 'Tự chọn — Bụng, Eo thon & Cardio đốt mỡ',
+      focus: 'Đốt calo nhanh, siết bụng sâu và cơ liên sườn',
+      exercises: ['jumping_jack', 'mountain_climber', 'plank', 'dead_bug', 'side_plank', 'leg_raise']
+    },
+    {
+      id: 'full_body',
+      shortLabel: 'Toàn thân',
+      title: 'Tự chọn — Toàn thân (Full Body)',
+      focus: 'Kích thích toàn bộ nhóm cơ lớn trong 1 buổi gọn gàng',
+      exercises: ['squat', 'bench_press', 'barbell_row', 'ohp', 'plank']
+    },
+    {
+      id: 'mobility',
+      shortLabel: 'Giãn cơ & Phục hồi',
+      title: 'Tự chọn — Giãn cơ & Phục hồi linh hoạt',
+      focus: 'Giải phóng căng cứng khớp, tăng độ dẻo dai và Core nhẹ',
+      exercises: ['pilates_stretch', 'clamshell', 'dead_bug', 'plank']
+    }
+  ];
+
   return {
     DAY_NAMES,
     ACTIVITY_LEVELS,
     EXERCISES,
     REST_DAY_TIPS,
     WORKOUT_TEMPLATES,
+    CUSTOM_WORKOUT_PRESETS,
     MEAL_POOLS
   };
 }));

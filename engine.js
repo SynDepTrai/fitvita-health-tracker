@@ -141,6 +141,26 @@
     };
   }
 
+  function resolveExercises(exIds) {
+    return exIds.map(exId => {
+      const base = Data.EXERCISES[exId];
+      return {
+        id: base.id,
+        name: base.name,
+        muscle: base.muscle,
+        sets: base.sets,
+        reps: base.reps,
+        rest: base.rest,
+        completed: false
+      };
+    });
+  }
+
+  function getTodayDayIndex(dateObj) {
+    const d = dateObj instanceof Date ? dateObj : new Date();
+    return (d.getDay() + 6) % 7; // 0 = Thứ 2 .. 6 = Chủ nhật
+  }
+
   function buildWeeklySchedule(gender, frequency, weekNumber) {
     const safeGender = gender === 'female' ? 'female' : 'male';
     const safeFreq = [3, 4, 5, 6].includes(Number(frequency)) ? Number(frequency) : 4;
@@ -161,25 +181,13 @@
           status: 'rest'
         };
       }
-      const exercises = d.exercises.map(exId => {
-        const base = Data.EXERCISES[exId];
-        return {
-          id: base.id,
-          name: base.name,
-          muscle: base.muscle,
-          sets: base.sets,
-          reps: base.reps,
-          rest: base.rest,
-          completed: false
-        };
-      });
       return {
         dayIndex: idx,
         dayLabel: Data.DAY_NAMES[idx],
         isRest: false,
         title: d.title,
         focus: d.focus,
-        exercises,
+        exercises: resolveExercises(d.exercises),
         startedAt: null,
         endedAt: null,
         locked: false,
@@ -197,6 +205,71 @@
       activeDayIndex: firstWorkoutIdx >= 0 ? firstWorkoutIdx : 0,
       days
     };
+  }
+
+  function applyCustomFocusToDay(state, dayIndex, presetId) {
+    const preset = Data.CUSTOM_WORKOUT_PRESETS.find(p => p.id === presetId);
+    if (!preset) return { ok: false, reason: 'invalid_preset' };
+
+    if (!state.workoutPlan) {
+      const gender = (state.profileInput && state.profileInput.gender) || 'male';
+      state.workoutPlan = buildWeeklySchedule(gender, 4, 1);
+    }
+
+    const plan = state.workoutPlan;
+    const targetIdx = Number.isInteger(dayIndex) && plan.days[dayIndex]
+      ? dayIndex
+      : getTodayDayIndex();
+    const day = plan.days[targetIdx];
+    if (day.locked) return { ok: false, reason: 'locked' };
+
+    if (!day.isCustom) {
+      day.originalSnapshot = {
+        isRest: day.isRest,
+        title: day.title,
+        focus: day.focus,
+        exercises: day.exercises.map(e => ({ ...e, completed: false }))
+      };
+    }
+
+    day.isRest = false;
+    day.isCustom = true;
+    day.customPresetId = preset.id;
+    day.title = preset.title;
+    day.focus = preset.focus;
+    day.exercises = resolveExercises(preset.exercises);
+    day.startedAt = null;
+    day.endedAt = null;
+    day.status = 'pending';
+
+    plan.activeDayIndex = targetIdx;
+    state.selectedWorkoutDay = targetIdx;
+    return { ok: true, dayIndex: targetIdx, preset };
+  }
+
+  function restoreDayFromCustom(state, dayIndex) {
+    if (!state || !state.workoutPlan || !state.workoutPlan.days[dayIndex]) return false;
+    const plan = state.workoutPlan;
+    const day = plan.days[dayIndex];
+    if (day.locked || !day.isCustom || !day.originalSnapshot) return false;
+
+    const snap = day.originalSnapshot;
+    day.isRest = snap.isRest;
+    day.title = snap.title;
+    day.focus = snap.focus;
+    day.exercises = snap.exercises.map(e => ({ ...e, completed: false }));
+    day.startedAt = null;
+    day.endedAt = null;
+    day.status = snap.isRest ? 'rest' : 'pending';
+    delete day.isCustom;
+    delete day.customPresetId;
+    delete day.originalSnapshot;
+
+    if (plan.activeDayIndex === dayIndex && day.isRest) {
+      const { nextIndex } = findNextWorkoutDayIndex(plan.days, dayIndex);
+      plan.activeDayIndex = nextIndex;
+    }
+    return true;
   }
 
   function findNextWorkoutDayIndex(days, fromDayIndex) {
@@ -471,7 +544,10 @@
     MEAL_SLOTS,
     assessBody,
     getBmiGaugePercent,
+    getTodayDayIndex,
     buildWeeklySchedule,
+    applyCustomFocusToDay,
+    restoreDayFromCustom,
     startWorkoutSession,
     toggleExercise,
     completeSessionManually,
