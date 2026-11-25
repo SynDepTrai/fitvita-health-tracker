@@ -21,14 +21,53 @@
     return Math.min(max, Math.max(min, num));
   }
 
-  // Ánh xạ BMI theo từng đoạn khớp chính xác với 4 vạch màu (0–25–50–75–100%)
-  function getBmiGaugePercent(bmi) {
+  // Ngưỡng BMI chuẩn Châu Á (IDI & WPRO) hiệu chỉnh riêng theo sinh lý Nam / Nữ
+  const BMI_THRESHOLDS = {
+    male: {
+      under: 18.5,
+      over: 23.5,
+      obese: 27.0,
+      normalMax: 23.4,
+      overMax: 26.9,
+      standardLabel: 'Chuẩn Châu Á cho Nam'
+    },
+    female: {
+      under: 18.5,
+      over: 22.0,
+      obese: 25.0,
+      normalMax: 21.9,
+      overMax: 24.9,
+      standardLabel: 'Chuẩn Châu Á cho Nữ'
+    }
+  };
+
+  function getBmiThresholds(gender) {
+    return gender === 'female' ? BMI_THRESHOLDS.female : BMI_THRESHOLDS.male;
+  }
+
+  // Ánh xạ BMI theo từng đoạn khớp chính xác với 4 vạch màu (0–25–50–75–100%) theo đúng giới tính
+  function getBmiGaugePercent(bmi, gender) {
+    const t = getBmiThresholds(gender);
     if (bmi <= 14) return 2;
-    if (bmi < 18.5) return ((bmi - 14) / (18.5 - 14)) * 25;
-    if (bmi < 25) return 25 + ((bmi - 18.5) / (25 - 18.5)) * 25;
-    if (bmi < 30) return 50 + ((bmi - 25) / (30 - 25)) * 25;
-    if (bmi < 38) return 75 + ((bmi - 30) / (38 - 30)) * 23;
+    if (bmi < t.under) return clamp(((bmi - 14) / (t.under - 14)) * 25, 2, 24.5);
+    if (bmi < t.over) return 25 + ((bmi - t.under) / (t.over - t.under)) * 25;
+    if (bmi < t.obese) return 50 + ((bmi - t.over) / (t.obese - t.over)) * 25;
+    const topMax = t.obese + 8;
+    if (bmi < topMax) return 75 + ((bmi - t.obese) / (topMax - t.obese)) * 23;
     return 98;
+  }
+
+  function estimateBodyFat(bmiRaw, age, gender) {
+    // Công thức Deurenberg chuẩn phân tách Nam/Nữ theo BMI & tuổi
+    const sexVal = gender === 'male' ? 1 : 0;
+    const pct = clamp(Math.round((1.2 * bmiRaw + 0.23 * age - 10.8 * sexVal - 5.4) * 10) / 10, 5, 60);
+    let label;
+    if (gender === 'male') {
+      label = pct < 10 ? 'Mỡ rất thấp' : pct <= 20 ? 'Mỡ lý tưởng (Nam)' : pct <= 25 ? 'Hơi thừa mỡ' : 'Mỡ cao';
+    } else {
+      label = pct < 18 ? 'Mỡ rất thấp' : pct <= 26 ? 'Mỡ lý tưởng (Nữ)' : pct <= 31 ? 'Hơi thừa mỡ' : 'Mỡ cao';
+    }
+    return { bodyFatPct: pct, bodyFatLabel: label };
   }
 
   function assessBody(input) {
@@ -51,58 +90,68 @@
     const heightM = heightCm / 100;
     const bmiRaw = weightKg / (heightM * heightM);
     const bmi = Math.round(bmiRaw * 10) / 10;
+    const thresholds = getBmiThresholds(gender);
+    const { bodyFatPct, bodyFatLabel } = estimateBodyFat(bmiRaw, age, gender);
 
     // Công thức Mifflin-St Jeor
     const bmrRaw = 10 * weightKg + 6.25 * heightCm - 5 * age + (gender === 'male' ? 5 : -161);
     const bmr = Math.round(bmrRaw);
     const tdee = Math.round(bmrRaw * activity.factor);
 
-    const idealMin = Math.round(18.5 * heightM * heightM * 10) / 10;
-    const idealMax = Math.round(24.9 * heightM * heightM * 10) / 10;
+    const idealMin = Math.round(thresholds.under * heightM * heightM * 10) / 10;
+    const idealMax = Math.round(thresholds.normalMax * heightM * heightM * 10) / 10;
+    const genderName = gender === 'male' ? 'nam giới' : 'nữ giới';
 
     let category, categoryLabel, goal, goalLabel, targetCalories, statusTone, summary, advice;
 
-    if (bmi < 18.5) {
+    if (bmi < thresholds.under) {
+      const surplus = gender === 'male' ? 350 : 250;
       category = 'underweight';
       categoryLabel = 'Thiếu cân';
       goal = 'gain';
       goalLabel = 'Tăng cân & phát triển cơ bắp lành mạnh';
-      targetCalories = tdee + 350;
+      targetCalories = tdee + surplus;
       statusTone = 'info';
       const needKg = Math.max(0.5, Math.round((idealMin - weightKg) * 10) / 10);
-      summary = `Cơ thể bạn đang ở mức thiếu cân (BMI ${bmi}). Mức cân nặng khỏe mạnh cho chiều cao ${heightCm} cm là ${idealMin}–${idealMax} kg (bạn nên tăng thêm tối thiểu khoảng ${needKg} kg).`;
-      advice = 'Cơ thể hiện chưa đủ dự trữ năng lượng và khối cơ. Hãy ăn thặng dư nhẹ ~350 kcal/ngày giàu đạm, kết hợp tập kháng lực để tăng cân săn chắc thay vì tích mỡ.';
-    } else if (bmi < 25) {
+      summary = `Với ${genderName} cao ${heightCm} cm, chỉ số BMI ${bmi} đang ở mức thiếu cân (mỡ ước tính ~${bodyFatPct}%). Vùng cân nặng chuẩn của bạn là ${idealMin}–${idealMax} kg (nên tăng thêm tối thiểu ~${needKg} kg).`;
+      advice = `Cơ thể hiện hơi gầy và thiếu khối cơ dự trữ. Hãy ăn thặng dư nhẹ +${surplus} kcal/ngày giàu đạm và tập kháng lực đều để tăng cân săn chắc thay vì tích mỡ bụng.`;
+    } else if (bmi < thresholds.over) {
       category = 'normal';
       categoryLabel = 'Cân đối';
       goal = 'maintain';
       goalLabel = 'Giữ dáng & tăng độ săn chắc';
       targetCalories = tdee;
       statusTone = 'success';
-      summary = `Tuyệt vời! Chỉ số BMI ${bmi} cho thấy thể trạng bạn đang cân đối, nằm gọn trong vùng lý tưởng (${idealMin}–${idealMax} kg).`;
+      summary = `Tuyệt vời! Theo ngưỡng chuẩn cho ${genderName} (${thresholds.under}–${thresholds.normalMax}), BMI ${bmi} (mỡ ước tính ~${bodyFatPct}%) nằm gọn trong vùng cân đối (${idealMin}–${idealMax} kg).`;
       advice = gender === 'male'
-        ? 'Thể trạng của bạn đã khá ổn. Hãy duy trì mức năng lượng quanh TDEE, tăng cường tập tạ và đạm để nét cơ và nâng sức mạnh thân trên.'
-        : 'Thể trạng của bạn đã khá ổn. Hãy duy trì mức năng lượng cân bằng, tập trung săn chắc mông–đùi–eo và cải thiện độ dẻo dai.';
-    } else if (bmi < 30) {
+        ? 'Thể trạng bạn đang rất ổn. Duy trì mức calo quanh TDEE, tăng dần mức tạ và đủ đạm để phát triển cơ thân trên rõ nét và khỏe khoắn.'
+        : 'Thể trạng bạn đang rất gọn gàng và cân đối. Duy trì mức năng lượng ổn định, ưu tiên tập săn chắc mông–đùi–eo và tăng độ dẻo dai.';
+    } else if (bmi < thresholds.obese) {
+      const deficit = gender === 'male' ? 450 : 350;
+      const minFloor = gender === 'male' ? 1500 : 1200;
       category = 'overweight';
       categoryLabel = 'Thừa cân';
       goal = 'lose';
       goalLabel = 'Giảm mỡ khoa học & bảo toàn cơ bắp';
-      targetCalories = Math.max(1250, tdee - 400);
+      targetCalories = Math.max(minFloor, tdee - deficit);
       statusTone = 'warning';
       const loseKg = Math.max(0.5, Math.round((weightKg - idealMax) * 10) / 10);
-      summary = `Chỉ số BMI ${bmi} cho thấy cơ thể bạn đang thừa cân nhẹ (khoảng ${loseKg} kg trên ngưỡng lý tưởng ${idealMin}–${idealMax} kg).`;
-      advice = 'Bạn nên tạo thâm hụt calo vừa phải (~400 kcal/ngày), ăn đủ đạm và tập luyện đều đặn để đốt mỡ bền vững mà không bị mệt mỏi hay mất cơ.';
+      summary = `Với ${genderName} cao ${heightCm} cm, BMI ${bmi} (mỡ ước tính ~${bodyFatPct}%) đã bước vào mức thừa cân — nặng hơn ngưỡng lý tưởng (${idealMin}–${idealMax} kg) khoảng ${loseKg} kg.`;
+      advice = gender === 'male'
+        ? `Nên tạo thâm hụt vừa phải khoảng ${deficit} kcal/ngày, giữ đủ đạm và tập tạ đều để đốt mỡ thừa mà vẫn bảo toàn khối cơ.`
+        : `Nữ giới có tỷ lệ mỡ sinh lý cao hơn nam ở cùng BMI, nên mức này cần bắt đầu giảm mỡ nhẹ (~${deficit} kcal/ngày), kết hợp tập mông–đùi–core và kiểm soát tinh bột tinh chế.`;
     } else {
+      const deficit = gender === 'male' ? 550 : 450;
+      const minFloor = gender === 'male' ? 1600 : 1250;
       category = 'obese';
       categoryLabel = 'Béo phì';
       goal = 'lose';
       goalLabel = 'Giảm mỡ an toàn, ưu tiên bảo vệ khớp & tim mạch';
-      targetCalories = Math.max(1350, tdee - 500);
+      targetCalories = Math.max(minFloor, tdee - deficit);
       statusTone = 'danger';
       const loseKg = Math.max(1, Math.round((weightKg - idealMax) * 10) / 10);
-      summary = `Chỉ số BMI ${bmi} đang ở ngưỡng béo phì (vượt khoảng ${loseKg} kg so với vùng cân đối ${idealMin}–${idealMax} kg).`;
-      advice = 'Cần ưu tiên giảm mỡ an toàn với mức thâm hụt ~500 kcal/ngày, hạn chế đường và dầu mỡ, kết hợp tập tăng dần cường độ và nghỉ phục hồi đầy đủ để bảo vệ khớp.';
+      summary = `Theo ngưỡng chuẩn Châu Á cho ${genderName} (≥ ${thresholds.obese}), BMI ${bmi} (mỡ ước tính ~${bodyFatPct}%) đang ở mức béo phì — vượt vùng lý tưởng (${idealMin}–${idealMax} kg) khoảng ${loseKg} kg.`;
+      advice = `Cần ưu tiên giảm mỡ bền vững với mức thâm hụt ~${deficit} kcal/ngày, hạn chế đường và đồ chiên rán, kết hợp tập cường độ vừa phải và nghỉ phục hồi đầy đủ để bảo vệ khớp gối & tim mạch.`;
     }
 
     // Phân bổ Macro chuẩn theo mục tiêu (Đạm / Tinh bột / Chất béo)
@@ -124,7 +173,10 @@
       activityId: activity.id,
       activityLabel: activity.label,
       bmi,
-      bmiGaugePercent: Math.round(getBmiGaugePercent(bmi) * 10) / 10,
+      bmiGaugePercent: Math.round(getBmiGaugePercent(bmi, gender) * 10) / 10,
+      thresholds,
+      bodyFatPct,
+      bodyFatLabel,
       bmr,
       tdee,
       idealMin,
@@ -530,18 +582,29 @@
   function sanitizeState(raw) {
     const base = createDefaultState();
     if (!raw || typeof raw !== 'object') return base;
-    return {
+    const merged = {
       ...base,
       ...raw,
       profileInput: { ...base.profileInput, ...(raw.profileInput || {}) },
       history: Array.isArray(raw.history) ? raw.history : []
     };
+    // Tự động tính lại chỉ số đã lưu theo thang đo Nam/Nữ mới nhất để tránh kết quả cũ bị lệch
+    if (merged.assessment) {
+      try {
+        merged.assessment = assessBody(merged.profileInput);
+      } catch (_) {
+        merged.assessment = null;
+      }
+    }
+    return merged;
   }
 
   return {
     FIVE_HOURS_MS,
     STORAGE_KEY,
     MEAL_SLOTS,
+    BMI_THRESHOLDS,
+    getBmiThresholds,
     assessBody,
     getBmiGaugePercent,
     getTodayDayIndex,

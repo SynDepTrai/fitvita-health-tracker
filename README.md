@@ -5,7 +5,7 @@
 **Trải nghiệm trực tuyến:** https://fitvita.up.railway.app
 
 ## Tính năng chính
-- **Đánh giá chỉ số cơ thể:** Tính BMI, BMR, TDEE, cân nặng lý tưởng, thước đo màu 4 mức và gợi ý mục tiêu tăng cân / giảm mỡ / giữ dáng.
+- **Đánh giá chỉ số cơ thể theo giới tính:** Tính BMI (chuẩn Châu Á phân tách riêng ngưỡng Nam & Nữ), tỷ lệ mỡ cơ thể ước tính (Deurenberg), BMR, TDEE, cân nặng lý tưởng và thước đo màu 4 mức tự động điều chỉnh theo giới tính.
 - **Lộ trình tập luyện & Nghỉ ngơi cá nhân hóa:** Phân chia riêng cho Nam & Nữ theo **3, 4, 5 hoặc 6 buổi/tuần**, tự động xen kẽ ngày nghỉ phục hồi kèm gợi ý chăm sóc sức khỏe.
 - **Tự chọn nhóm cơ tập hôm nay:** Nếu bạn đã biết hôm nay muốn tập gì (*Ngực & Tay sau, Lưng & Tay trước, Chân & Đùi, Mông & Hông, Vai & Tay, Bụng & Đốt mỡ, Toàn thân, Giãn cơ*), chỉ cần chọn 1 chạm để rải sẵn bài tập chuẩn kèm hướng dẫn (và khôi phục lịch gốc bất cứ lúc nào).
 - **Bảng lịch tập & Hướng dẫn kỹ thuật:** Checkbox hoàn thành, thanh tiến độ thời gian thực, hướng dẫn tư thế chuẩn, nhịp thở và lưu ý tránh chấn thương cho từng bài tập.

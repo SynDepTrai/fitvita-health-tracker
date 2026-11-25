@@ -174,10 +174,14 @@
       `;
     } else {
       const toneBadge = `badge-${a.statusTone}`;
+      const th = a.thresholds || Engine.getBmiThresholds(a.gender);
       resultHtml = `
         <div class="card" id="assessment-result">
           <div class="card-header">
-            <h2 class="card-title">Kết quả chỉ số cơ thể</h2>
+            <div>
+              <h2 class="card-title">Kết quả chỉ số cơ thể</h2>
+              <div style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">Áp dụng thang đo riêng: ${escapeHtml(th.standardLabel)}</div>
+            </div>
             <span class="badge ${toneBadge}">${escapeHtml(a.categoryLabel)}</span>
           </div>
 
@@ -185,26 +189,26 @@
             <div class="bmi-value-block">
               <span class="bmi-number tabular">${a.bmi.toFixed(1)}</span>
               <div>
-                <div style="font-weight:700; font-size:0.94rem;">Chỉ số BMI của bạn</div>
-                <div style="font-size:0.82rem; color:var(--text-muted);">Cân nặng lý tưởng: ${a.idealMin} – ${a.idealMax} kg</div>
+                <div style="font-weight:700; font-size:0.94rem;">BMI • Mỡ ước tính ~${a.bodyFatPct.toFixed(1)}%</div>
+                <div style="font-size:0.82rem; color:var(--text-muted);">Cân nặng chuẩn (${a.gender === 'male' ? 'Nam' : 'Nữ'}): ${a.idealMin} – ${a.idealMax} kg</div>
               </div>
             </div>
-            <span class="badge badge-neutral">${escapeHtml(a.goalLabel)}</span>
+            <span class="badge badge-neutral">${escapeHtml(a.bodyFatLabel)}</span>
           </div>
 
-          <div class="bmi-scale-wrap" aria-label="Thước đo BMI trực quan">
+          <div class="bmi-scale-wrap" aria-label="Thước đo BMI trực quan theo giới tính">
             <div class="bmi-bar-track">
-              <div class="bmi-seg" title="Thiếu cân (<18.5)"></div>
-              <div class="bmi-seg" title="Cân đối (18.5–24.9)"></div>
-              <div class="bmi-seg" title="Thừa cân (25–29.9)"></div>
-              <div class="bmi-seg" title="Béo phì (≥30)"></div>
+              <div class="bmi-seg" title="Thiếu cân (&lt; ${th.under})"></div>
+              <div class="bmi-seg" title="Cân đối (${th.under} – ${th.normalMax})"></div>
+              <div class="bmi-seg" title="Thừa cân (${th.over.toFixed(1)} – ${th.overMax})"></div>
+              <div class="bmi-seg" title="Béo phì (&ge; ${th.obese.toFixed(1)})"></div>
               <div class="bmi-needle" style="left: ${a.bmiGaugePercent}%;" title="BMI của bạn: ${a.bmi}"></div>
             </div>
             <div class="bmi-ticks">
-              <span>Thiếu cân<br/>&lt; 18.5</span>
-              <span>Cân đối<br/>18.5 – 24.9</span>
-              <span>Thừa cân<br/>25 – 29.9</span>
-              <span>Béo phì<br/>&ge; 30</span>
+              <span>Thiếu cân<br/>&lt; ${th.under}</span>
+              <span>Cân đối<br/>${th.under} – ${th.normalMax}</span>
+              <span>Thừa cân<br/>${th.over.toFixed(1)} – ${th.overMax}</span>
+              <span>Béo phì<br/>&ge; ${th.obese.toFixed(1)}</span>
             </div>
           </div>
 
@@ -217,7 +221,7 @@
             <div class="kpi-box">
               <div class="kpi-label">Nên nạp mỗi ngày</div>
               <div class="kpi-value tabular" style="color:var(--accent);">${a.targetCalories.toLocaleString('vi-VN')} <small style="font-size:0.76rem;font-weight:600;">kcal</small></div>
-              <div class="kpi-sub">${a.goal === 'gain' ? 'Tăng thêm +350 kcal/ngày' : a.goal === 'lose' ? 'Giảm nhẹ để đốt mỡ' : 'Giữ nguyên để giữ dáng'}</div>
+              <div class="kpi-sub">${a.goal === 'gain' ? `Tăng thêm +${a.gender === 'male' ? 350 : 250} kcal/ngày` : a.goal === 'lose' ? 'Giảm nhẹ để đốt mỡ' : 'Giữ nguyên để giữ dáng'}</div>
             </div>
             <div class="kpi-box">
               <div class="kpi-label">Gợi ý dưỡng chất/ngày</div>
