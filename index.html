@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css?v=3" />
+  <link rel="stylesheet" href="styles.css?v=4" />
 </head>
 <body>
   <div class="app-shell">
@@ -68,6 +68,15 @@
         </nav>
 
         <div class="topbar-actions">
+          <div class="palette-wrap">
+            <button type="button" id="palette-toggle" class="icon-btn palette-btn" aria-label="Chọn màu giao diện" aria-expanded="false" aria-controls="palette-popover" title="Đổi tông màu giao diện dễ nhìn">
+              <span class="palette-dot" id="current-palette-dot" aria-hidden="true"></span>
+            </button>
+            <div id="palette-popover" class="palette-popover" role="dialog" aria-label="Chọn màu giao diện" hidden>
+              <div class="palette-popover-title">Chọn tông màu dễ nhìn</div>
+              <div class="palette-list" id="palette-list"></div>
+            </div>
+          </div>
           <button type="button" id="theme-toggle" class="icon-btn" aria-label="Đổi giao diện sáng/tối" title="Đổi giao diện Sáng / Tối">
             <span id="theme-icon" aria-hidden="true"></span>
           </button>
@@ -157,8 +166,8 @@
   <!-- Toast Container -->
   <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="data.js?v=2"></script>
-  <script src="engine.js?v=2"></script>
-  <script src="app.js?v=2"></script>
+  <script src="data.js?v=4"></script>
+  <script src="engine.js?v=4"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>

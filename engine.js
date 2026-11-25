@@ -559,6 +559,7 @@
       version: 1,
       activeTab: 'overview',
       theme: 'light',
+      colorTheme: 'emerald',
       profileInput: {
         gender: 'male',
         age: 26,

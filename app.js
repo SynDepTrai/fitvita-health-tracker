@@ -69,14 +69,69 @@
     setTimeout(() => el.remove(), 3600);
   }
 
+  const COLOR_THEMES = [
+    { id: 'emerald', label: 'Xanh Ngọc', desc: 'Tươi mát, năng động', swatch: '#059669', metaLight: '#0B1F3A', metaDark: '#060E1B' },
+    { id: 'ocean', label: 'Xanh Biển', desc: 'Dịu mắt, thư thái', swatch: '#0284C7', metaLight: '#0C2544', metaDark: '#050E1A' },
+    { id: 'sage', label: 'Xanh Rừng', desc: 'Nhẹ dịu, đỡ mỏi mắt', swatch: '#2F7D57', metaLight: '#163026', metaDark: '#07100D' },
+    { id: 'indigo', label: 'Tím Nhẹ', desc: 'Hiện đại, tinh tế', swatch: '#4F46E5', metaLight: '#191E3F', metaDark: '#080A16' },
+    { id: 'coral', label: 'San Hô Ấm', desc: 'Ấm áp, giàu sức sống', swatch: '#D6455D', metaLight: '#2A1927', metaDark: '#10090F' }
+  ];
+
+  function renderPaletteMenu() {
+    const list = document.getElementById('palette-list');
+    if (!list) return;
+    const currentId = COLOR_THEMES.some(c => c.id === state.colorTheme) ? state.colorTheme : 'emerald';
+    list.innerHTML = COLOR_THEMES.map(c => {
+      const active = c.id === currentId;
+      return `
+        <button type="button" class="palette-option" data-pick-color="${c.id}" aria-pressed="${active}">
+          <span class="palette-opt-left">
+            <span class="palette-swatch" style="background:${c.swatch};"></span>
+            <span>
+              ${escapeHtml(c.label)}
+              <span class="palette-opt-sub">${escapeHtml(c.desc)}</span>
+            </span>
+          </span>
+          <span aria-hidden="true" style="color:var(--accent); font-weight:800;">${active ? '✓' : ''}</span>
+        </button>
+      `;
+    }).join('');
+
+    list.querySelectorAll('[data-pick-color]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.colorTheme = btn.dataset.pickColor;
+        saveState();
+        applyTheme();
+        closePalettePopover();
+        const picked = COLOR_THEMES.find(c => c.id === state.colorTheme);
+        if (picked) showToast(`Đã đổi giao diện sang màu ${picked.label}.`);
+      });
+    });
+  }
+
+  function closePalettePopover() {
+    const pop = document.getElementById('palette-popover');
+    const btn = document.getElementById('palette-toggle');
+    if (pop) pop.hidden = true;
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+
   function applyTheme() {
-    document.documentElement.setAttribute('data-theme', state.theme === 'dark' ? 'dark' : 'light');
+    const isDark = state.theme === 'dark';
+    const colorObj = COLOR_THEMES.find(c => c.id === state.colorTheme) || COLOR_THEMES[0];
+    document.documentElement.setAttribute('data-theme', isDark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-color', colorObj.id);
+
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) themeMeta.setAttribute('content', isDark ? colorObj.metaDark : colorObj.metaLight);
+
     const iconEl = document.getElementById('theme-icon');
-    if (state.theme === 'dark') {
+    if (isDark) {
       iconEl.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>';
     } else {
       iconEl.innerHTML = '<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
     }
+    renderPaletteMenu();
   }
 
   function setTab(tabName) {
@@ -1356,6 +1411,19 @@
       applyTheme();
     });
 
+    const paletteToggle = document.getElementById('palette-toggle');
+    const palettePopover = document.getElementById('palette-popover');
+    if (paletteToggle && palettePopover) {
+      paletteToggle.addEventListener('click', e => {
+        e.stopPropagation();
+        const willOpen = palettePopover.hidden;
+        palettePopover.hidden = !willOpen;
+        paletteToggle.setAttribute('aria-expanded', String(willOpen));
+      });
+      palettePopover.addEventListener('click', e => e.stopPropagation());
+      document.addEventListener('click', () => closePalettePopover());
+    }
+
     document.getElementById('sim-5h-btn').addEventListener('click', () => {
       const res = Engine.simulateFiveHoursPassed(state, Date.now());
       if (!res.ok) {
@@ -1410,6 +1478,7 @@
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
+        closePalettePopover();
         document.querySelectorAll('.modal-backdrop:not([hidden])').forEach(m => {
           m.hidden = true;
           if (m.id === 'missed-modal') {
